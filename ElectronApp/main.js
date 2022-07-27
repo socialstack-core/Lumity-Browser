@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const path = require('path');
 
 const createWindow = () => {
@@ -9,8 +9,20 @@ const createWindow = () => {
 			preload: path.join(__dirname, 'preload.js')
 		}
 	});
-
-	win.loadFile('./UI/public/index.html');
+	
+	ipcMain.handle('dialog:openDirectory', async () => {
+		const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+			properties: ['openDirectory']
+		});
+		
+		if (canceled) {
+			return null;
+		} else {
+			return filePaths && filePaths.length ? filePaths[0] : null;
+		}
+	});
+	
+	win.loadFile('./UI/public/index.en.html');
 }
 
 // This method will be called when Electron has finished
